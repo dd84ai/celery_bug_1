@@ -4,29 +4,31 @@ on:
   push: {}
   workflow_call: {}
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   unit-test:
     runs-on: ubuntu-latest
-    name: Unit tests ${{ matrix.python-version }}/Django ${{ matrix.django }}
-    strategy:
-      matrix:
-        python-version:
-          - "3.8"
-        django:
-          - "4.0"
+    name: Unit tests
+    container: python:3.8
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
       - name: Install requirements
         run: |
-          pip install "django~=${{ matrix.django }}"
           pip install pyyaml coveralls -r requirements.txt
       - name: Pytest
         run: pytest -s -k test_db_conn_in_celery
+        env:
+          APP_DATABASE_HOST: postgres
