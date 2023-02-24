@@ -1,0 +1,13 @@
+version: "3"
+tasks:
+  dev:worker:
+    cmds:
+      - celery -A testdjangoapp.celery worker -E
+
+  test_error:
+    cmds:
+      - pytest -s -k test_db_conn_in_celery
+
+  poetry_export:
+    cmds:
+      - poetry export --without-hashes --format=requirements.txt > requirements.txt

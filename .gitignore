@@ -1,0 +1,10 @@
+.venv
+.mypy_cache
+__pycache__/
+.pytest_cache/
+*.bkp
+*.dtmp
+.pytest_cache
+venv38/
+celerybeat-schedule/
+.python-version

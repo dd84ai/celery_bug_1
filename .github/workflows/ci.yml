@@ -1,0 +1,32 @@
+name: Lint & Tests
+
+on:
+  push: {}
+  workflow_call: {}
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    name: Unit tests ${{ matrix.python-version }}/Django ${{ matrix.django }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.8"
+        django:
+          - "4.0"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Install requirements
+        run: |
+          pip install "django~=${{ matrix.django }}"
+          pip install pyyaml coveralls -r requirements.txt
+      - name: Pytest
+        run: pytest -s -k test_db_conn_in_celery
